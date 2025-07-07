@@ -15,20 +15,21 @@ const client = createClient({
 });
 
 // FIX 1: Define the full "skeleton" for your content type.
-// This tells TypeScript about the fields AND the content type ID.
+// By providing the content type ID ('blogPost'), we give TypeScript
+// enough information to correctly type the 'fields' property.
 type BlogPostSkeleton = EntrySkeletonType<{
   title: string;
   text: Document;
-}>;
+}, "blogPost">;
 
 function App() {
-  // FIX 2: Use the new skeleton type in useState.
+  // Use the new skeleton type in useState.
   const [posts, setPosts] = useState<Entry<BlogPostSkeleton>[]>([]);
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        // FIX 3: Use the skeleton type when fetching entries.
+        // Use the skeleton type when fetching entries.
         const response = await client.getEntries<BlogPostSkeleton>({ content_type: 'blogPost' });
         
         if (response.items) {
@@ -52,9 +53,10 @@ function App() {
           <article key={post.sys.id}>
             <h2>{post.fields.title}</h2>
             <div>
-              {documentToReactComponents(post.fields.text)}
+              {/* FIX 2: Check if post.fields.text exists before rendering */}
+              {post.fields.text && documentToReactComponents(post.fields.text)}
             </div>
-            <hr />
+            <hr/>
           </article>
         ))
       ) : (
