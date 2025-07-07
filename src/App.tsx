@@ -1,37 +1,42 @@
 import { useEffect, useState } from "react";
-import type { Schema } from "../amplify/data/resource";
-import { generateClient } from "aws-amplify/data";
+import { documentToReactComponents } from '@contentful/rich-text-react-renderer';
+import { createClient } from 'contentful';
+import type { Document } from '@contentful/rich-text-types';
 
-const client = generateClient<Schema>();
+const client = createClient({
+  space: 'h66dvnjgy1q4',
+  environment: 'master', // defaults to 'master' if not set
+  accessToken: 'Zk5JSoji1fbiVJEIueMNv67S5IsaSGKpTV332pYNjHI'
+})
 
 function App() {
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
+
+  const [body, setBody] = useState(null);
 
   useEffect(() => {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
-    });
-  }, []);
+    const fetchPage = async () => {
+      try {
+        const entry = await client.getEntry('EO80XfTYtGkwc7joiHyWD');
+        if (entry.fields.text) {
+          setBody(entry.fields.text as Document);
+        }
+      }
+      catch (error) {
+        console.error("error occurred", error)
+      }
+    };
 
-  function createTodo() {
-    client.models.Todo.create({ content: window.prompt("Todo content") });
-  }
+    fetchPage();
+  }, []);
+  
 
   return (
     <main>
-      <h1>My todos</h1>
-      <button onClick={createTodo}>+ new</button>
-      <ul>
-        {todos.map((todo) => (
-          <li key={todo.id}>{todo.content}</li>
-        ))}
-      </ul>
+      <h1>Aditya Sharma</h1>
       <div>
-        🥳 App successfully hosted. Try creating a new todo.
+        🥳 This is me!
+        {body ? documentToReactComponents(body) : <p>Loading...</p>}
         <br />
-        <a href="https://docs.amplify.aws/react/start/quickstart/#make-frontend-updates">
-          Review next step of this tutorial.
-        </a>
       </div>
     </main>
   );
