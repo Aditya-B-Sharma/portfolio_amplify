@@ -11,7 +11,7 @@ const client = createClient({
 
 function App() {
 
-  const [body, setBody] = useState(null);
+  const [body, setBody] = useState<Document | null>(null);
 
   useEffect(() => {
     const fetchPage = async () => {
